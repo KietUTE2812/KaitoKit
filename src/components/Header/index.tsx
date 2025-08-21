@@ -50,7 +50,7 @@ export default function Header() {
                             Trang chủ
                         </Link>
                         <Link
-                            href="/blog"
+                            href="/post"
                             className="text-white hover:text-accent transition-colors duration-200 font-medium"
                         >
                             Bài viết
@@ -62,7 +62,7 @@ export default function Header() {
                             Giới thiệu
                         </Link>
                         <Link
-                            href="/contact"
+                            href="/about#contact"
                             className="text-white hover:text-accent transition-colors duration-200 font-medium"
                         >
                             Liên hệ
@@ -138,13 +138,13 @@ export default function Header() {
                                 {user && (
                                     <>
                                         <div className="h-px w-full bg-primary" />
-                                        <Link href="/profile" className="flex justify-between px-3 py-2 text-primary hover:text-accent rounded-md transition-colors duration-200 font-medium flex items-center gap-2" onClick={() => {
+                                        <div className="flex justify-between px-3 py-2 text-primary hover:text-accent rounded-md transition-colors duration-200 font-medium flex items-center gap-2" onClick={() => {
                                             logout();
                                             router.push('/login');
                                         }}>
                                             <span>Đăng xuất</span>
                                             <LogOut className="w-4 h-4" />
-                                        </Link>
+                                        </div>
                                     </>
                                 )}
                             </Dropdown>

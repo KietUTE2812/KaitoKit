@@ -1,3 +1,4 @@
+import api from '@/api/apiInstance';
 import React, { useState, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -20,20 +21,46 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
 
     const insertText = (before: string, after: string = '') => {
         if (!textareaRef.current) return;
-        
+
         const textarea = textareaRef.current;
         const start = textarea.selectionStart;
         const end = textarea.selectionEnd;
         const selectedText = content.substring(start, end);
-        
+
         const newText = content.substring(0, start) + before + selectedText + after + content.substring(end);
         onChange(newText);
-        
+
         // Set cursor position after inserted text
         setTimeout(() => {
             textarea.focus();
             textarea.setSelectionRange(start + before.length, start + before.length + selectedText.length);
         }, 0);
+    };
+
+    const uploadImage = async (file: File) => {
+        const formData = new FormData();
+        formData.append('image', file);
+        const response = await api.post('/images/upload', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+        return response.url;
+    };
+
+    const handleImageUpload = () => {
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = 'image/*';
+        fileInput.onchange = (e) => {
+            const file = (e.target as HTMLInputElement).files?.[0];
+            if (file) {
+                uploadImage(file).then((imageUrl) => {
+                    insertText(`![alt ${file.name}](${imageUrl})`);
+                });
+            }
+        };
+        fileInput.click();
     };
 
     const toolbarButtons = [
@@ -46,7 +73,7 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
         { label: '•', title: 'Bullet List', action: () => insertText('- ') },
         { label: '1.', title: 'Numbered List', action: () => insertText('1. ') },
         { label: '🔗', title: 'Link', action: () => insertText('[', '](url)') },
-        { label: '📷', title: 'Image', action: () => insertText('![alt text](', ')') },
+        { label: '📷', title: 'Image', action: () => handleImageUpload() },
         { label: '💬', title: 'Quote', action: () => insertText('> ') },
         { label: '```', title: 'Code Block', action: () => insertText('```\n', '\n```') },
         { label: '`', title: 'Inline Code', action: () => insertText('`', '`') },
@@ -68,27 +95,25 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
                         {button.label}
                     </button>
                 ))}
-                
+
                 <div className="ml-auto flex items-center gap-2">
                     <button
                         type="button"
                         onClick={() => setIsPreview(false)}
-                        className={`px-3 py-1 text-sm rounded transition-colors duration-200 ${
-                            !isPreview 
-                                ? 'bg-primary text-primary-foreground' 
-                                : 'bg-background hover:bg-accent/20 border border-border'
-                        }`}
+                        className={`px-3 py-1 text-sm rounded transition-colors duration-200 ${!isPreview
+                            ? 'bg-primary text-primary-foreground'
+                            : 'bg-background hover:bg-accent/20 border border-border'
+                            }`}
                     >
                         Edit
                     </button>
                     <button
                         type="button"
                         onClick={() => setIsPreview(true)}
-                        className={`px-3 py-1 text-sm rounded transition-colors duration-200 ${
-                            isPreview 
-                                ? 'bg-primary text-primary-foreground' 
-                                : 'bg-background hover:bg-accent/20 border border-border'
-                        }`}
+                        className={`px-3 py-1 text-sm rounded transition-colors duration-200 ${isPreview
+                            ? 'bg-primary text-primary-foreground'
+                            : 'bg-background hover:bg-accent/20 border border-border'
+                            }`}
                     >
                         Preview
                     </button>
@@ -99,7 +124,7 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
             <div className="min-h-[300px]">
                 {isPreview ? (
                     <div className="p-4 prose prose-invert max-w-none">
-                        <ReactMarkdown 
+                        <ReactMarkdown
                             remarkPlugins={[remarkGfm]}
                             components={{
                                 // Custom styling for code blocks
@@ -152,8 +177,8 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
                                 ),
                                 // Custom styling for links
                                 a: ({ children, href }) => (
-                                    <a 
-                                        href={href} 
+                                    <a
+                                        href={href}
                                         className="text-primary hover:text-primary/80 underline"
                                         target="_blank"
                                         rel="noopener noreferrer"
@@ -162,19 +187,36 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
                                     </a>
                                 ),
                                 // Custom styling for images
-                                img: ({ src, alt }) => (
-                                    <div className="my-6">
-                                        <img
-                                            src={src}
-                                            alt={alt || 'Image'}
-                                            className="max-w-full h-auto rounded-lg shadow-lg mx-auto"
-                                            loading="lazy"
-                                        />
-                                        {alt && (
-                                            <p className="text-center text-sm text-muted mt-2 italic">{alt}</p>
-                                        )}
-                                    </div>
-                                ),
+                                img: ({ src, alt }) => {
+                                    let width, height, realAlt, rotate;
+                                    if (alt && alt.includes("|")) {
+                                        const [altText, size, r] = alt.split("|");
+                                        realAlt = altText;
+                                        const [w, h] = size.split("x");
+                                        width = w ? parseInt(w) : undefined;
+                                        height = h ? parseInt(h) : undefined;
+                                        rotate = r ? parseInt(r) : undefined;
+                                    } else {
+                                        realAlt = alt;
+                                    }
+
+                                    return (
+                                        <div className="my-6 text-center">
+                                            <img
+                                                src={src}
+                                                alt={realAlt || "Image"}
+                                                width={width}
+                                                height={height}
+                                                className="rounded-lg shadow-lg inline-block max-w-[500px] h-auto"
+                                                loading="lazy"
+                                                style={{ transform: `rotate(${rotate}deg)` }}
+                                            />
+                                            {realAlt && (
+                                                <p className="text-sm text-muted mt-2 italic">{realAlt}</p>
+                                            )}
+                                        </div>
+                                    );
+                                },
                                 // Custom styling for tables
                                 table: ({ children }) => (
                                     <div className="overflow-x-auto mb-4">

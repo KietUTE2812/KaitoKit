@@ -6,6 +6,7 @@ import { Edit, Trash2, Eye, Search, Filter, Calendar, User, Tag, MoreVertical, P
 import api from '@/api/apiInstance';
 import useLoading from '@/components/GlobalLoading/useLoading';
 import toast from 'react-hot-toast';
+import Image from 'next/image';
 
 interface Post {
     id: string;
@@ -75,18 +76,18 @@ const PostList: React.FC<PostListProps> = ({ onPostSelect, showActions = true })
     const filterAndSortPosts = () => {
         let filtered = posts.length > 0 ? posts?.filter((post: Post) => {
             const matchesSearch = post?.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                                post?.content?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                                post?.author?.name?.toLowerCase().includes(searchQuery.toLowerCase());
-            
+                post?.content?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                post?.author?.name?.toLowerCase().includes(searchQuery.toLowerCase());
+
             const matchesStatus = statusFilter === 'all' || post?.status === statusFilter;
-            
+
             return matchesSearch && matchesStatus;
         }) : [];
 
         // Sort posts
         filtered?.sort((a: Post, b: Post) => {
             let aValue: any, bValue: any;
-            
+
             switch (sortBy) {
                 case 'createdAt':
                     aValue = new Date(a.createdAt);
@@ -121,7 +122,7 @@ const PostList: React.FC<PostListProps> = ({ onPostSelect, showActions = true })
 
     const handleDelete = async (postId: string) => {
         if (!confirm('Bạn có chắc chắn muốn xóa bài viết này?')) return;
-        
+
         setLoading(true);
         try {
             await api.delete(`/posts/${postId}`);
@@ -261,10 +262,12 @@ const PostList: React.FC<PostListProps> = ({ onPostSelect, showActions = true })
                                     <td className="px-6 py-4">
                                         <div className="flex items-center space-x-3">
                                             {post?.featuredImage && (
-                                                <img
+                                                <Image
                                                     src={post.featuredImage}
                                                     alt={post.title}
                                                     className="w-12 h-12 object-cover rounded-lg"
+                                                    width={500}
+                                                    height={500}
                                                 />
                                             )}
                                             <div className="flex-1 min-w-0">
@@ -317,14 +320,22 @@ const PostList: React.FC<PostListProps> = ({ onPostSelect, showActions = true })
                                         <td className="px-6 py-4">
                                             <div className="flex items-center space-x-2">
                                                 <button
-                                                    onClick={() => router.push(`/admin/posts/${post.slug}`)}      
+                                                    onClick={() => {
+                                                        setLoading(true);
+                                                        router.push(`/admin/posts/${post.slug}`);
+                                                        setLoading(false);
+                                                    }}
                                                     className="p-2 text-muted hover:text-text hover:bg-accent/20 rounded-lg transition-colors"
                                                     title="Xem chi tiết"
                                                 >
                                                     <Eye className="w-4 h-4" />
                                                 </button>
                                                 <button
-                                                    onClick={() => router.push(`/admin/posts/${post.slug}/edit`)}
+                                                    onClick={() => {
+                                                        setLoading(true);
+                                                        router.push(`/admin/posts/${post.slug}/edit`);
+                                                        setLoading(false);
+                                                    }}
                                                     className="p-2 text-muted hover:text-blue-500 hover:bg-blue-500/10 rounded-lg transition-colors"
                                                     title="Chỉnh sửa"
                                                 >

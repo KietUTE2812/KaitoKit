@@ -1,12 +1,18 @@
-const Avatar = ({ src, alt, size = 10 }: { src: string, alt: string, size?: number }) => {
-    const randomAvatar = () => {
-        return "/tile_1.png";
-    }
+import Image from "next/image";
+
+const Avatar = ({ src, alt, size = 10 }: { src: string; alt: string; size?: number }) => {
+    const randomAvatar = () => "/tile_1.png";
+
     return (
-        <div className={`w-${size} h-${size} bg-primary rounded-full flex items-center justify-center`}>
-            <img className='rounded-full object-cover bg-transparent w-full h-full' src={src || randomAvatar()} alt={alt} />
+        <div className={`relative w-${size} h-${size} bg-primary rounded-full overflow-hidden`}>
+            <Image
+                src={src || randomAvatar()}
+                alt={alt || "avatar"}
+                fill
+                className="object-cover"
+            />
         </div>
-    )
-}
+    );
+};
 
 export default Avatar;
