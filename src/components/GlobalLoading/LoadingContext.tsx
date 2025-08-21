@@ -14,7 +14,9 @@ export const LoadingProvider = ({ children }: { children: React.ReactNode }) => 
 
             {loading && (
                 <div className="fixed inset-0 z-50 bg-black bg-opacity-40 flex items-center justify-center">
-                    <Loader2 className="w-12 h-12 animate-spin text-white" />
+                    <img src="/Kit2.png" alt="loading" className="w-12" style={{
+                        animation: 'flip-around 1s linear infinite',
+                    }} />
                 </div>
             )}
         </LoadingContext.Provider>

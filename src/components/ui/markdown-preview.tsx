@@ -10,24 +10,24 @@ interface MarkdownPreviewProps {
 export default function MarkdownPreview({ content, className = '' }: MarkdownPreviewProps) {
   return (
     <div className={`prose prose-invert max-w-none ${className}`}>
-      <ReactMarkdown 
+      <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{
-                     // Custom styling for code blocks
-           code({ node, inline, className, children, ...props }: any) {
-             const match = /language-(\w+)/.exec(className || '');
-             return !inline && match ? (
-               <pre className="bg-gray-800 rounded-lg p-4 overflow-x-auto">
-                 <code className={`language-${match[1]} text-sm text-white`} {...props}>
-                   {children}
-                 </code>
-               </pre>
-             ) : (
-               <code className="bg-gray-800 px-1 py-0.5 rounded text-sm" {...props}>
-                 {children}
-               </code>
-             );
-           },
+          // Custom styling for code blocks
+          code({ node, inline, className, children, ...props }: any) {
+            const match = /language-(\w+)/.exec(className || '');
+            return !inline && match ? (
+              <pre className="bg-gray-800 rounded-lg p-4 overflow-x-auto">
+                <code className={`language-${match[1]} text-sm text-white`} {...props}>
+                  {children}
+                </code>
+              </pre>
+            ) : (
+              <code className="bg-gray-800 px-1 py-0.5 rounded text-sm" {...props}>
+                {children}
+              </code>
+            );
+          },
           // Custom styling for headings
           h1: ({ children }) => (
             <h1 className="text-3xl font-bold text-text mb-4 mt-6 first:mt-0">{children}</h1>
@@ -61,31 +61,48 @@ export default function MarkdownPreview({ content, className = '' }: MarkdownPre
               {children}
             </blockquote>
           ),
-                     // Custom styling for links
-           a: ({ children, href }) => (
-             <a 
-               href={href} 
-               className="text-primary hover:text-primary/80 underline"
-               target="_blank"
-               rel="noopener noreferrer"
-             >
-               {children}
-             </a>
-           ),
-           // Custom styling for images
-           img: ({ src, alt }) => (
-             <div className="my-6">
-               <img
-                 src={src}
-                 alt={alt || 'Image'}
-                 className="max-w-full h-auto rounded-lg shadow-lg mx-auto"
-                 loading="lazy"
-               />
-               {alt && (
-                 <p className="text-center text-sm text-muted mt-2 italic">{alt}</p>
-               )}
-             </div>
-           ),
+          // Custom styling for links
+          a: ({ children, href }) => (
+            <a
+              href={href}
+              className="text-primary hover:text-primary/80 underline"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {children}
+            </a>
+          ),
+          // Custom styling for images
+          img: ({ src, alt }) => {
+            let width, height, realAlt, rotate;
+            if (alt && alt.includes("|")) {
+              const [altText, size, r] = alt.split("|");
+              realAlt = altText;
+              const [w, h] = size.split("x");
+              width = w ? parseInt(w) : undefined;
+              height = h ? parseInt(h) : undefined;
+              rotate = r ? parseInt(r) : undefined;
+            } else {
+              realAlt = alt;
+            }
+
+            return (
+              <div className="my-6 text-center">
+                <img
+                  src={src}
+                  alt={realAlt || "Image"}
+                  width={width}
+                  height={height}
+                  className="rounded-lg shadow-lg inline-block max-w-[500px] h-auto"
+                  loading="lazy"
+                  style={{ transform: `rotate(${rotate}deg)` }}
+                />
+                {realAlt && (
+                  <p className="text-sm text-muted mt-2 italic">{realAlt}</p>
+                )}
+              </div>
+            );
+          },
           // Custom styling for tables
           table: ({ children }) => (
             <div className="overflow-x-auto mb-4">

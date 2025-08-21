@@ -2,6 +2,9 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
+import api from '@/api/apiInstance';
+import toast from 'react-hot-toast';
+import useLoading from '@/components/GlobalLoading/useLoading';
 
 export default function Portfolio() {
     const [activeTab, setActiveTab] = useState('about');
@@ -9,7 +12,13 @@ export default function Portfolio() {
     const upCoponentRef = useRef<HTMLDivElement>(null);
     const downCoponentRef = useRef<HTMLDivElement>(null);
 
+    const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
+    const [message, setMessage] = useState('');
+
     const [animate, setAnimate] = useState(false); // Thời gian biến mất
+
+    const setLoading = useLoading();
 
     useEffect(() => {
         const introTimeout = setTimeout(() => {
@@ -27,8 +36,12 @@ export default function Portfolio() {
     }, []);
 
     useEffect(() => {
-        document.getElementById('hero')?.scrollIntoView({ behavior: 'smooth' });
-        fallAnimation();
+        // document.getElementById('hero')?.scrollIntoView({ behavior: 'smooth' });
+        fallAnimation(false);
+
+        return () => {
+            fallAnimation(true);
+        }
     }, []);
 
     // Scroll reveal animations
@@ -50,23 +63,27 @@ export default function Portfolio() {
     }, []);
 
 
-    const fallAnimation = () => {
-        const numImages = 15;
-        const duration = 5; // thời gian rơi
-        const delay = 5; // độ trễ
-        for (let i = 0; i < numImages; i++) {
-            const img = document.createElement("img");
-            img.src = "/Kit.png";
-            img.className = "fall";
+    const fallAnimation = (remove: boolean = false) => {
+        if (remove) {
+            document.querySelectorAll('.fall').forEach((el) => el.remove());
+        } else {
+            const numImages = 15;
+            const duration = 5; // thời gian rơi
+            const delay = 5; // độ trễ
+            for (let i = 0; i < numImages; i++) {
+                const img = document.createElement("img");
+                img.src = "/Kit.png";
+                img.className = "fall";
 
-            // Random vị trí ngang (chỉ lấy 10% vị trí ngang = 10)
-            img.style.left = Math.random() * 95 + "vw";
+                // Random vị trí ngang (chỉ lấy 10% vị trí ngang = 10)
+                img.style.left = Math.random() * 95 + "vw";
 
-            img.style.animationDuration = duration + "s";
-            // Random độ trễ
-            img.style.animationDelay = Math.random() * delay + "s";
+                img.style.animationDuration = duration + "s";
+                // Random độ trễ
+                img.style.animationDelay = Math.random() * delay + "s";
 
-            document.body.appendChild(img);
+                document.body.appendChild(img);
+            }
         }
     }
 
@@ -131,6 +148,26 @@ export default function Portfolio() {
         }
     ];
 
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        setLoading(true);
+        const formData = new FormData();
+        formData.append('name', name);
+        formData.append('email', email);
+        formData.append('message', message);
+
+        api.post('/contact', formData).then((res: any) => {
+            toast.success('Thank you for your message!');
+            setName('');
+            setEmail('');
+            setMessage('');
+        }).catch((err: any) => {
+            toast.error('Something went wrong!');
+        }).finally(() => {
+            setLoading(false);
+        });
+    };
+
     return (
         <div className="min-h-screen relative bg-[#0b0616] overflow-hidden">
             <img className="absolute inset-0 h-full w-full scale-[1.02] object-cover blur-2xl opacity-25" alt="" aria-hidden="true" sizes="100vw" loading="eager" srcSet="https://persistent.oaistatic.com/burrito-nux/640.webp 640w, https://persistent.oaistatic.com/burrito-nux/1280.webp 1280w, https://persistent.oaistatic.com/burrito-nux/1920.webp 1920w" src="https://persistent.oaistatic.com/burrito-nux/1280.webp"></img>
@@ -190,7 +227,7 @@ export default function Portfolio() {
                             I'm a developer passionate about technology and web application development.
                         </p>
                         <div className="flex gap-4 justify-center">
-                            <a href="/DAOTANKIET_SOFTWARE_ENGINEER.pdf" download="DAOTANKIET_SOFTWARE_ENGINEER.pdf" target="_blank" rel="noreferrer" className="bg-white text-blue-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors shadow-lg">
+                            <a href="/DAOTANKIET_CV_SOFTWARE.pdf" download="DAOTANKIET_CV_SOFTWARE.pdf" target="_blank" rel="noreferrer" className="bg-white text-blue-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors shadow-lg">
                                 Download CV
                             </a>
                             <a href="#contact" className="border-2 border-white/80 text-white px-6 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-700 transition-colors shadow-lg">
@@ -356,18 +393,18 @@ export default function Portfolio() {
                         <div className="reveal bg-white/10 backdrop-blur rounded-xl p-6 border border-white/20">
                             <h3 className="text-lg font-semibold mb-4">Get in touch</h3>
                             <p className="text-white/80 mb-4">Have a question or want to work together? Send me a message.</p>
-                            <form onSubmit={(e) => e.preventDefault()} className="space-y-4">
+                            <form onSubmit={handleSubmit} className="space-y-4">
                                 <div>
                                     <label className="block text-sm mb-1" htmlFor="name">Name</label>
-                                    <input id="name" className="w-full px-3 py-2 rounded-lg bg-black/30 border border-white/20 outline-none focus:ring-2 focus:ring-blue-500" placeholder="Your name" />
+                                    <input id="name" className="w-full px-3 py-2 rounded-lg bg-black/30 border border-white/20 outline-none focus:ring-2 focus:ring-blue-500" placeholder="Your name" value={name} onChange={(e) => setName(e.target.value)} />
                                 </div>
                                 <div>
                                     <label className="block text-sm mb-1" htmlFor="email">Email</label>
-                                    <input id="email" type="email" className="w-full px-3 py-2 rounded-lg bg-black/30 border border-white/20 outline-none focus:ring-2 focus:ring-blue-500" placeholder="you@example.com" />
+                                    <input id="email" type="email" className="w-full px-3 py-2 rounded-lg bg-black/30 border border-white/20 outline-none focus:ring-2 focus:ring-blue-500" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} />
                                 </div>
                                 <div>
                                     <label className="block text-sm mb-1" htmlFor="message">Message</label>
-                                    <textarea id="message" rows={4} className="w-full px-3 py-2 rounded-lg bg-black/30 border border-white/20 outline-none focus:ring-2 focus:ring-blue-500" placeholder="How can I help?" />
+                                    <textarea id="message" rows={4} className="w-full px-3 py-2 rounded-lg bg-black/30 border border-white/20 outline-none focus:ring-2 focus:ring-blue-500" placeholder="How can I help?" value={message} onChange={(e) => setMessage(e.target.value)} />
                                 </div>
                                 <button className="w-full bg-white text-blue-700 font-semibold py-2 rounded-lg hover:bg-gray-100 transition" type="submit">Send</button>
                             </form>
@@ -376,6 +413,14 @@ export default function Portfolio() {
                             <h3 className="text-lg font-semibold mb-4">Contact info</h3>
                             <ul className="space-y-3">
                                 <li>
+                                    <div className="flex flex-row items-center justify-start gap-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-phone">
+                                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                                        </svg>
+                                        <p className="text-white/80">Phone: 0399072812</p>
+                                    </div>
+                                </li>
+                                <li>
                                     <a href="mailto:kiet.ute2812@gmail.com" className="hover:underline">tankiet281203@gmail.com</a>
                                 </li>
                                 <li>
@@ -383,6 +428,15 @@ export default function Portfolio() {
                                 </li>
                                 <li>
                                     <a href="https://www.linkedin.com/in/dao-tan-kiet-079424312/" target="_blank" rel="noreferrer" className="hover:underline">LinkedIn</a>
+                                </li>
+                                <li>
+                                    <a href="/" target="_blank" rel="noreferrer" className="hover:underline flex flex-row items-center justify-start gap-2">My Blog Website
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-external-link">
+                                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                                            <polyline points="15 3 21 3 21 9" />
+                                            <line x1="10" y1="14" x2="21" y2="3" />
+                                        </svg>
+                                    </a>
                                 </li>
                             </ul>
                         </div>

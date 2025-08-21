@@ -68,7 +68,7 @@ export default function Footer() {
                             </li>
                             <li>
                                 <Link
-                                    href="/blog"
+                                    href="/post"
                                     className="text hover:text-primary transition-colors duration-200"
                                 >
                                     Bài viết
@@ -84,7 +84,7 @@ export default function Footer() {
                             </li>
                             <li>
                                 <Link
-                                    href="/contact"
+                                    href="/about#contact"
                                     className="text hover:text-primary transition-colors duration-200"
                                 >
                                     Liên hệ

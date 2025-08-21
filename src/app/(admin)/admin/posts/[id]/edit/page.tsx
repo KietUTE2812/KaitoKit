@@ -108,6 +108,23 @@ const EditPost = () => {
         }));
     };
 
+    const handleUploadFeaturedImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const formData = new FormData();
+            formData.append('image', file);
+            const res = await api.post('/images/upload', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+            setFormData(prev => ({
+                ...prev,
+                featuredImage: res.url
+            }));
+        }
+    };
+
     const handleAddTag = () => {
         if (tagInput.trim() && !formData.tags.includes(tagInput.trim())) {
             setFormData(prev => ({
@@ -127,7 +144,7 @@ const EditPost = () => {
 
     const handleSave = async (publish: boolean = false) => {
         if (!post) return;
-        
+
         const finalStatus = publish ? 'published' : formData.status;
         const finalData = {
             ...formData,
@@ -149,7 +166,7 @@ const EditPost = () => {
     };
 
     const handleCancel = () => {
-        router.push(`/admin`);
+        router.back();
     };
 
     if (!post) {
@@ -174,7 +191,7 @@ const EditPost = () => {
                                 <p className="text-muted">Cập nhật thông tin bài viết</p>
                             </div>
                         </div>
-                        
+
                         <div className="flex items-center space-x-2">
                             <button
                                 onClick={() => setIsPreview(!isPreview)}
@@ -245,7 +262,7 @@ const EditPost = () => {
                                     <div className="prose prose-invert max-w-none">
                                         <MarkdownEditor
                                             content={formData.content}
-                                            onChange={() => {}}
+                                            onChange={() => { }}
                                         />
                                     </div>
                                 ) : (
@@ -335,11 +352,13 @@ const EditPost = () => {
                                 <h3 className="text-lg font-semibold text-text mb-4">Ảnh đại diện</h3>
                                 <div className="space-y-3">
                                     <input
-                                        type="text"
-                                        value={formData.featuredImage}
-                                        onChange={(e) => handleInputChange('featuredImage', e.target.value)}
+                                        type="file"
+                                        onChange={handleUploadFeaturedImage}
                                         className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                                        placeholder="URL ảnh đại diện..."
+                                    />
+                                    <span className="text-muted">Hoặc nhập URL ảnh đại diện</span>
+                                    <input type="text" value={formData.featuredImage} onChange={(e) => handleInputChange('featuredImage', e.target.value)}
+                                        className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                                     />
                                     {formData.featuredImage && (
                                         <div className="relative">

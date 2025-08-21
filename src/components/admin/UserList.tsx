@@ -6,6 +6,7 @@ import { Edit, Trash2, Eye, Search, User, Mail, Calendar, Shield, MoreVertical, 
 import api from '@/api/apiInstance';
 import useLoading from '@/components/GlobalLoading/useLoading';
 import toast from 'react-hot-toast';
+import Image from 'next/image';
 
 interface User {
     id: string;
@@ -61,18 +62,18 @@ const UserList: React.FC<UserListProps> = ({ onUserSelect, showActions = true })
     const filterAndSortUsers = () => {
         let filtered = users.filter(user => {
             const matchesSearch = user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                                user.email.toLowerCase().includes(searchQuery.toLowerCase());
-            
+                user.email.toLowerCase().includes(searchQuery.toLowerCase());
+
             const matchesRole = roleFilter === 'all' || user.role === roleFilter;
             const matchesStatus = statusFilter === 'all' || user.status === statusFilter;
-            
+
             return matchesSearch && matchesRole && matchesStatus;
         });
 
         // Sort users
         filtered.sort((a, b) => {
             let aValue: any, bValue: any;
-            
+
             switch (sortBy) {
                 case 'createdAt':
                     aValue = new Date(a.createdAt);
@@ -107,7 +108,7 @@ const UserList: React.FC<UserListProps> = ({ onUserSelect, showActions = true })
 
     const handleDelete = async (userId: string) => {
         if (!confirm('Bạn có chắc chắn muốn xóa người dùng này?')) return;
-        
+
         setLoading(true);
         try {
             await api.delete(`/users/${userId}`);
@@ -125,7 +126,7 @@ const UserList: React.FC<UserListProps> = ({ onUserSelect, showActions = true })
         setLoading(true);
         try {
             await api.put(`/users/${userId}`, { status: newStatus });
-            setUsers(users.map(user => 
+            setUsers(users.map(user =>
                 user.id === userId ? { ...user, status: newStatus } : user
             ));
             toast.success('Cập nhật trạng thái thành công');
@@ -141,7 +142,7 @@ const UserList: React.FC<UserListProps> = ({ onUserSelect, showActions = true })
         setLoading(true);
         try {
             await api.put(`/users/${userId}`, { role: newRole });
-            setUsers(users.map(user => 
+            setUsers(users.map(user =>
                 user.id === userId ? { ...user, role: newRole } : user
             ));
             toast.success('Cập nhật vai trò thành công');
@@ -304,10 +305,12 @@ const UserList: React.FC<UserListProps> = ({ onUserSelect, showActions = true })
                                         <div className="flex items-center space-x-3">
                                             <div className="flex-shrink-0">
                                                 {user.avatar ? (
-                                                    <img
+                                                    <Image
                                                         src={user.avatar}
                                                         alt={user.name}
                                                         className="w-10 h-10 rounded-full object-cover"
+                                                        width={500}
+                                                        height={500}
                                                     />
                                                 ) : (
                                                     <div className="w-10 h-10 bg-accent/20 rounded-full flex items-center justify-center">

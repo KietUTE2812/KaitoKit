@@ -64,7 +64,7 @@ export default function Home() {
             </div>
           </div>
           <div className="flex justify-center items-center w-1/3">
-            <img className='rounded-lg object-cover bg-transparent' src="/tile_3.png" alt="Logo" />
+            <Image className='rounded-lg object-cover bg-transparent' src="/tile_3.png" alt="Logo" width={500} height={500} />
           </div>
         </div>
       </section>
@@ -161,7 +161,7 @@ export default function Home() {
             <div className="flex justify-center">
               <div className="w-80 h-80 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-full flex items-center justify-center">
                 <div className="w-60 h-60 bg-primary rounded-full flex items-center justify-center">
-                  <img className='rounded-full object-cover bg-transparent w-full h-full' src="/tile_7.png" alt="Logo" />
+                  <Image className='rounded-full object-cover bg-transparent w-full h-full' src="/tile_7.png" alt="Logo" width={500} height={500} />
                 </div>
               </div>
             </div>

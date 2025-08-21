@@ -223,7 +223,7 @@ body {
   }
 
   100% {
-    transform: translateY(410vh) rotate(360deg);
+    transform: translateY(390vh) rotate(360deg);
     opacity: 0.8;
   }
 }
